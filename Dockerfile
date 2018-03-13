@@ -1,6 +1,25 @@
-FROM k8s.gcr.io/volume-nfs:0.8
+FROM centos:latest
+MAINTAINER "Alphayax <alphayax@gmail.com>"
 
-RUN echo "" > /etc/exports
-RUN echo "/exports *(rw,fsid=0,insecure,no_root_squash)" >> /etc/exports.d/aaa
-RUN echo "/ *(rw,fsid=0,insecure,no_root_squash)" >> /etc/exports.d/aaa
+# Install nfs-utils
+RUN yum -y install /usr/bin/ps nfs-utils && yum clean all
+
+# Copy entrypoint
+ADD run_nfs.sh /usr/local/bin/run_nfs.sh
+
+# Create exports dir
+RUN mkdir -p /exports	\
+ && chmod +x /usr/local/bin/run_nfs.sh
+
+# Export NFS Ports
+EXPOSE 20048/tcp 2049/tcp
+
+# Expose volume
+VOLUME /exports
+
+# Launch entrypoint
+ENTRYPOINT ["/usr/local/bin/run_nfs.sh"]
+
+CMD ["/exports"]
+
 
