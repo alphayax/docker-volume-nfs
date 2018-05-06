@@ -1,0 +1,68 @@
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: web-download
+spec:
+  ports:
+  - port: 80
+  selector:
+    role: web-frontend-download
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-download-conf
+data:
+  default.conf: |-
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   /usr/share/nginx/html/;
+            autoindex on;
+        }
+    }
+
+---
+
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: web-download
+spec:
+  replicas: 2
+  selector:
+    role: web-frontend-download
+  template:
+    metadata:
+      labels:
+        role: web-frontend-download
+    spec:
+      containers:
+
+      - name: web
+        image: nginx
+        ports:
+        - name: web
+          containerPort: 80
+        volumeMounts:
+        - name: nfs
+          mountPath: "/usr/share/nginx/html"
+        - name: web-download-conf
+          mountPath: /etc/nginx/conf.d/
+
+      volumes:
+      - name: nfs
+        persistentVolumeClaim:
+          claimName: nfs-volume
+      - name: web-download-conf
+        configMap:
+          name: web-download-conf
+
+---
+
