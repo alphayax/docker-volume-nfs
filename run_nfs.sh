@@ -44,7 +44,7 @@ function start()
        /usr/sbin/rpcbind -w
     fi
 
-    mount -t nfsd nfds /proc/fs/nfsd; s=$?
+    mount -t nfsd nfsd /proc/fs/nfsd; s=$?
     if [ $s -ne 0 ]; then
        echo "FATAL : Unable to mount NFS"
        echo "> Check that /etc/exports.d/ is mounted and contain informations about NFS exports"
